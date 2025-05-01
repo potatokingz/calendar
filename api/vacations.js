@@ -1,12 +1,51 @@
+// /api/vacations.js
 import axios from 'axios';
 
-const BIN_ID = '68135a788a456b7966953ee7';  // Ensure this is the correct Bin ID
-const API_KEY = '$2a$10$ACr.6duTvcT6konafWW7L.5c7GN7lfiy7JdMZ78Xa6p78RwRcAf16';  // Ensure API Key is correct
+const DEV_API_KEY = 'Rc8fZlMwdfJSazhYQIwHvYX2BxxicvZi';  // Your Developer API Key
+const USERNAME = 'potatoexploits_';  // Your Pastebin username
+const PASSWORD = 'yaseneroo123456imrpo';  // Your Pastebin password
 
+// Function to get the User API Key
+async function getUserApiKey() {
+  try {
+    const response = await axios.post('https://pastebin.com/api/api_login.php', null, {
+      params: {
+        api_dev_key: DEV_API_KEY,
+        api_user_name: USERNAME,
+        api_user_password: PASSWORD,
+      }
+    });
+
+    return response.data;  // This is your User API Key
+  } catch (error) {
+    console.error('Error getting User API Key:', error);
+  }
+}
+
+// Function to create a new paste with vacation data
+async function createPaste(userApiKey, vacationData) {
+  try {
+    const response = await axios.post('https://pastebin.com/api/api_post.php', null, {
+      params: {
+        api_dev_key: DEV_API_KEY,
+        api_user_key: userApiKey,
+        api_paste_data: JSON.stringify(vacationData),  // Store vacation data as a string
+        api_paste_name: 'vacation_data',  // Name of the paste
+        api_paste_private: 1,  // 1 = Unlisted, 2 = Private, 0 = Public
+        api_paste_expire_date: 'N',  // 'N' = No expiration
+      }
+    });
+
+    return response.data;  // The URL of the created paste
+  } catch (error) {
+    console.error('Error creating paste:', error);
+  }
+}
+
+// POST Request Handler (for adding vacation data)
 export default async function handler(req, res) {
   if (req.method === 'POST') {
     const { name, start, end, reason } = req.body;
-
     if (!name || !start || !end || !reason) {
       return res.status(400).json({ error: 'Missing required fields.' });
     }
@@ -14,49 +53,16 @@ export default async function handler(req, res) {
     const newEntry = { name, start, end, reason };
 
     try {
-      // Fetch the current vacation data from JSONBin.io
-      const response = await axios.get(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
-        headers: {
-          'X-Master-Key': API_KEY
-        }
-      });
+      // Get the User API Key
+      const userApiKey = await getUserApiKey();
 
-      // Retrieve existing vacation data or initialize an empty array
-      const data = response.data.record.vacations || [];
+      // Create a paste with vacation data
+      const pasteUrl = await createPaste(userApiKey, newEntry);
 
-      // Add the new entry
-      data.push(newEntry);
-
-      // Update the data on JSONBin.io
-      await axios.put(
-        `https://api.jsonbin.io/v3/b/${BIN_ID}`,
-        { record: { vacations: data } },
-        {
-          headers: {
-            'X-Master-Key': API_KEY,
-            'Content-Type': 'application/json'
-          }
-        }
-      );
-
-      res.status(200).json({ message: 'Vacation added successfully.' });
+      // Return success response with the Paste URL
+      res.status(200).json({ message: 'Vacation added successfully!', pasteUrl });
     } catch (error) {
-      console.error(error);
-      res.status(500).json({ error: 'Error saving to JSONBin.' });
-    }
-  } else if (req.method === 'GET') {
-    try {
-      const response = await axios.get(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
-        headers: {
-          'X-Master-Key': API_KEY
-        }
-      });
-
-      const vacations = response.data.record.vacations || [];
-      res.status(200).json({ vacations });
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ error: 'Error loading data from JSONBin.' });
+      res.status(500).json({ error: 'Failed to store vacation data.' });
     }
   } else {
     res.status(405).json({ error: 'Method not allowed.' });
