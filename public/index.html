@@ -2,60 +2,194 @@
 <html lang="bg">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Отпуски Календар</title>
-  
-  <!-- FullCalendar Styles -->
+  <title>Календар за отпуски</title>
   <link href="https://cdn.jsdelivr.net/npm/@fullcalendar/core/main.min.css" rel="stylesheet" />
   <link href="https://cdn.jsdelivr.net/npm/@fullcalendar/daygrid/main.min.css" rel="stylesheet" />
-  
   <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background: #f5f5f5;
+    }
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+    h1 {
+      text-align: center;
+      color: #2c3e50;
+    }
+    .panel {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    button {
+      background: #3498db;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 4px;
+      cursor: pointer;
+      margin: 5px;
+    }
+    button:hover {
+      background: #2980b9;
+    }
     #calendar {
-      max-width: 900px;
-      margin: 50px auto;
+      margin: 20px 0;
+      display: none; /* Hidden by default */
+    }
+    .vacation-entry {
+      background: #ecf0f1;
+      padding: 15px;
+      margin: 10px 0;
+      border-left: 4px solid #3498db;
+      border-radius: 4px;
+    }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    input, textarea {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+    .controls {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 15px;
     }
   </style>
 </head>
 <body>
-  <h1>Отпуски Календар</h1>
-  
-  <div id="calendar"></div>
-  
-  <!-- FullCalendar Scripts -->
+  <div class="container">
+    <h1>📅 Календар за отпуски</h1>
+    
+    <div class="panel">
+      <div class="controls">
+        <button id="toggleCalendar">Покажи календара</button>
+        <button id="todayBtn">Отиди на днес</button>
+      </div>
+      <div id="calendar"></div>
+    </div>
+
+    <div class="panel">
+      <h2>Добави отпуск</h2>
+      <form id="vacationForm">
+        <div class="form-group">
+          <label for="name">Име:</label>
+          <input type="text" id="name" required>
+        </div>
+        <div class="form-group">
+          <label for="start">Начална дата:</label>
+          <input type="date" id="start" required>
+        </div>
+        <div class="form-group">
+          <label for="end">Крайна дата:</label>
+          <input type="date" id="end" required>
+        </div>
+        <div class="form-group">
+          <label for="reason">Причина:</label>
+          <textarea id="reason" rows="3" required></textarea>
+        </div>
+        <button type="submit">Добави отпуск</button>
+      </form>
+    </div>
+
+    <div class="panel">
+      <h2>Записи за отпуски</h2>
+      <div id="vacationList"></div>
+    </div>
+  </div>
+
   <script src="https://cdn.jsdelivr.net/npm/@fullcalendar/core/main.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@fullcalendar/daygrid/main.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@fullcalendar/interaction/main.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fullcalendar/core/locales/bg.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fullcalendar/interaction/main.min.js"></script> <!-- Add this script for interaction -->
 
   <script>
-    // Initialize FullCalendar
     document.addEventListener('DOMContentLoaded', function() {
+      // Initialize calendar
       const calendarEl = document.getElementById('calendar');
+      const toggleBtn = document.getElementById('toggleCalendar');
+      
+      const calendar = new FullCalendar.Calendar(calendarEl, {
+        plugins: ['dayGrid', 'interaction'], // Added interaction plugin for event handling
+        initialView: 'dayGridMonth',
+        locale: 'bg',
+        firstDay: 1, // Monday as first day
+        events: [],
+        eventClick: function(info) {
+          alert(`Отпуск: ${info.event.title}\nОт: ${info.event.start.toLocaleDateString('bg-BG')}\nДо: ${info.event.end.toLocaleDateString('bg-BG')}\nПричина: ${info.event.extendedProps.description}`);
+        }
+      });
+      calendar.render();
 
-      // Fetch vacation data from the API
-      fetch('/api/get-vacations')
-        .then(response => response.json())
-        .then(vacations => {
-          // Prepare events for the calendar
-          const events = vacations.map(vacation => {
-            return {
-              title: vacation.name + ' - ' + vacation.reason, // Event title
-              start: vacation.start,  // Event start date
-              end: vacation.end,      // Event end date
-              description: vacation.reason, // Optional description
-            };
-          });
+      // Toggle calendar visibility
+      let isCalendarVisible = false;
+      toggleBtn.addEventListener('click', function() {
+        isCalendarVisible = !isCalendarVisible;
+        calendarEl.style.display = isCalendarVisible ? 'block' : 'none';
+        toggleBtn.textContent = isCalendarVisible ? 'Скрий календара' : 'Покажи календара';
+        
+        // Update calendar size when made visible
+        if(isCalendarVisible) {
+          setTimeout(() => {
+            calendar.updateSize();
+          }, 100);
+        }
+      });
 
-          // Initialize FullCalendar
-          const calendar = new FullCalendar.Calendar(calendarEl, {
-            plugins: ['dayGrid', 'interaction'],
-            initialView: 'dayGridMonth',
-            events: events, // Set events to display
-            eventClick: function(info) {
-              alert('Отпуск: ' + info.event.title + '\n' + 'От: ' + info.event.start + ' до: ' + info.event.end + '\nПричина: ' + info.event.extendedProps.description);
-            }
-          });
-          calendar.render();
+      // Today button
+      document.getElementById('todayBtn').addEventListener('click', function() {
+        if(isCalendarVisible) {
+          calendar.today();
+        } else {
+          alert('Моля, първо покажете календара!');
+        }
+      });
+
+      // Handle form submission
+      document.getElementById('vacationForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const name = document.getElementById('name').value;
+        const start = document.getElementById('start').value;
+        const end = document.getElementById('end').value;
+        const reason = document.getElementById('reason').value;
+        
+        // Add to calendar
+        calendar.addEvent({
+          title: `${name} (${reason})`,
+          start: start,
+          end: end,
+          description: reason,
+          color: '#3498db'
         });
+        
+        // Add to list
+        const entry = document.createElement('div');
+        entry.className = 'vacation-entry';
+        entry.innerHTML = `
+          <strong>${name}</strong>
+          <p>📅 <b>От:</b> ${new Date(start).toLocaleDateString('bg-BG')} <b>До:</b> ${new Date(end).toLocaleDateString('bg-BG')}</p>
+          <p>📝 <i>${reason}</i></p>
+        `;
+        document.getElementById('vacationList').prepend(entry);
+        
+        // Reset form
+        this.reset();
+      });
     });
   </script>
 </body>
