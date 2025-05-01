@@ -1,12 +1,10 @@
+<!-- index.html -->
 <!DOCTYPE html>
 <html lang="bg">
 <head>
   <meta charset="UTF-8">
   <title>Календар за отпуски</title>
-
-  <!-- FullCalendar CSS -->
   <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet">
-
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -18,19 +16,8 @@
       text-align: center;
       color: #2c3e50;
     }
-    .calendar-wrapper {
+    .calendar-wrapper, .form-container {
       max-width: 900px;
-      margin: 20px auto;
-      background: white;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    }
-    #vacationCalendar {
-      max-width: 100%;
-    }
-    .form-container {
-      max-width: 500px;
       margin: 20px auto;
       background: white;
       padding: 20px;
@@ -66,87 +53,98 @@
   </style>
 </head>
 <body>
+  <h1>📆 Календар за отпуски</h1>
+  <div class="calendar-wrapper">
+    <div id="vacationCalendar"></div>
+  </div>
 
-<h1>📆 Календар за отпуски</h1>
-<div class="calendar-wrapper">
-  <div id="vacationCalendar"></div>
-</div>
+  <div class="form-container">
+    <h2>Добавяне на отпуск</h2>
+    <form id="vacationForm">
+      <div class="form-group">
+        <label for="title">Име</label>
+        <input type="text" id="title" required>
+      </div>
+      <div class="form-group">
+        <label for="start">Начална дата и час</label>
+        <input type="datetime-local" id="start" required>
+      </div>
+      <div class="form-group">
+        <label for="end">Крайна дата и час</label>
+        <input type="datetime-local" id="end" required>
+      </div>
+      <div class="form-group">
+        <label for="description">Причина</label>
+        <textarea id="description" rows="3"></textarea>
+      </div>
+      <button type="submit">Запази отпуск</button>
+    </form>
+  </div>
 
-<div class="form-container">
-  <h2>Добавяне на отпуск</h2>
-  <form id="vacationForm">
-    <div class="form-group">
-      <label for="title">Име</label>
-      <input type="text" id="title" required>
-    </div>
-    <div class="form-group">
-      <label for="start">Начална дата и час</label>
-      <input type="datetime-local" id="start" required>
-    </div>
-    <div class="form-group">
-      <label for="end">Крайна дата и час</label>
-      <input type="datetime-local" id="end" required>
-    </div>
-    <div class="form-group">
-      <label for="description">Причина</label>
-      <textarea id="description" rows="3"></textarea>
-    </div>
-    <button type="submit">Запази отпуск</button>
-  </form>
-</div>
+  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async function () {
+      const vacationCalendarEl = document.getElementById('vacationCalendar');
 
-<!-- FullCalendar JS -->
-<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
-
-<script>
-  document.addEventListener('DOMContentLoaded', function () {
-    const vacationCalendarEl = document.getElementById('vacationCalendar');
-
-    const vacationCalendar = new FullCalendar.Calendar(vacationCalendarEl, {
-      initialView: 'dayGridMonth',
-      locale: 'bg',
-      events: JSON.parse(localStorage.getItem('vacationEvents')) || [],
-      eventClick: function(info) {
-        alert(`🛫 Отпуск: ${info.event.title}\n🕒 От: ${info.event.start.toLocaleString('bg-BG')}\nДо: ${info.event.end ? info.event.end.toLocaleString('bg-BG') : '—'}\n📝 ${info.event.extendedProps.description || 'Без причина'}`);
+      async function loadEvents() {
+        try {
+          const response = await fetch('/api/vacations');
+          const data = await response.json();
+          return data.vacations || [];
+        } catch (err) {
+          console.error('Грешка при зареждане на отпуските:', err);
+          return [];
+        }
       }
+
+      const events = await loadEvents();
+
+      const vacationCalendar = new FullCalendar.Calendar(vacationCalendarEl, {
+        initialView: 'dayGridMonth',
+        locale: 'bg',
+        events: events.map(ev => ({
+          title: ev.name,
+          start: ev.start,
+          end: ev.end,
+          description: ev.reason,
+          color: '#3498db'
+        })),
+        eventClick: function (info) {
+          alert(`🛫 Отпуск: ${info.event.title}\n🕒 От: ${info.event.start.toLocaleString('bg-BG')}\nДо: ${info.event.end ? info.event.end.toLocaleString('bg-BG') : '—'}\n📝 ${info.event.extendedProps.description || 'Без причина'}`);
+        }
+      });
+
+      vacationCalendar.render();
+
+      document.getElementById('vacationForm').addEventListener('submit', async function (e) {
+        e.preventDefault();
+
+        const name = document.getElementById('title').value;
+        const start = document.getElementById('start').value;
+        const end = document.getElementById('end').value;
+        const reason = document.getElementById('description').value;
+
+        try {
+          const res = await fetch('/api/vacations', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, start, end, reason })
+          });
+
+          const result = await res.json();
+
+          if (res.ok) {
+            vacationCalendar.addEvent({ title: name, start, end, description: reason, color: '#3498db' });
+            this.reset();
+          } else {
+            alert(result.error || 'Грешка при добавяне на отпуск.');
+          }
+        } catch (err) {
+          console.error(err);
+          alert('Възникна грешка при изпращане на заявката.');
+        }
+      });
     });
-
-    vacationCalendar.render();
-
-    // Обработка на формата
-    document.getElementById('vacationForm').addEventListener('submit', function (e) {
-      e.preventDefault();
-
-      const title = document.getElementById('title').value;
-      const start = document.getElementById('start').value;
-      const end = document.getElementById('end').value;
-      const description = document.getElementById('description').value;
-
-      const newEvent = {
-        title: title,
-        start: start,
-        end: end,
-        description: description,
-        color: '#3498db'
-      };
-
-      vacationCalendar.addEvent(newEvent);
-
-      // Запази в localStorage
-      const currentEvents = vacationCalendar.getEvents().map(event => ({
-        title: event.title,
-        start: event.start.toISOString(),
-        end: event.end ? event.end.toISOString() : null,
-        description: event.extendedProps.description,
-        color: event.backgroundColor
-      }));
-
-      localStorage.setItem('vacationEvents', JSON.stringify(currentEvents));
-
-      this.reset();
-    });
-  });
-</script>
-
+  </script>
 </body>
 </html>
