@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+  <meta charset="UTF-8">
+  <title>Календар за отпуски</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f0f2f5;
+      margin: 40px auto;
+      max-width: 800px;
+    }
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+    form {
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      margin-bottom: 30px;
+    }
+    label {
+      display: block;
+      margin-top: 15px;
+    }
+    input, textarea {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+      box-sizing: border-box;
+    }
+    button {
+      margin-top: 20px;
+      padding: 10px;
+      background-color: #007acc;
+      color: white;
+      border: none;
+      width: 100%;
+      cursor: pointer;
+    }
+    .vacation-entry {
+      background: #fff;
+      padding: 15px;
+      border-left: 5px solid #007acc;
+      margin-bottom: 15px;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🗓️ Календар за отпуски</h1>
+
+  <form id="vacationForm">
+    <label for="name">Име:</label>
+    <input type="text" id="name" required>
+
+    <label for="start">Начална дата:</label>
+    <input type="date" id="start" required>
+
+    <label for="end">Крайна дата:</label>
+    <input type="date" id="end" required>
+
+    <label for="reason">Причина за отпуска:</label>
+    <textarea id="reason" rows="3" required></textarea>
+
+    <button type="submit">Добави отпуска</button>
+  </form>
+
+  <div id="vacationList"></div>
+
+  <script>
+    const form = document.getElementById('vacationForm');
+    const list = document.getElementById('vacationList');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const name = document.getElementById('name').value;
+      const start = document.getElementById('start').value;
+      const end = document.getElementById('end').value;
+      const reason = document.getElementById('reason').value;
+
+      await fetch('/api/add-vacation', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, start, end, reason })
+      });
+
+      form.reset();
+      loadVacations();
+    });
+
+    async function loadVacations() {
+      const res = await fetch('/api/get-vacations');
+      const data = await res.json();
+
+      list.innerHTML = '';
+      data.forEach(({ name, start, end, reason }) => {
+        const entry = document.createElement('div');
+        entry.className = 'vacation-entry';
+        entry.innerHTML = `
+          <strong>${name}</strong><br>
+          📅 <b>От:</b> ${start} <b>До:</b> ${end}<br>
+          📝 <i>${reason}</i>
+        `;
+        list.appendChild(entry);
+      });
+    }
+
+    loadVacations();
+  </script>
+
+</body>
+</html>
