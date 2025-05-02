@@ -1,9 +1,9 @@
 // pages/api/vacations.js
 import axios from 'axios';
 
-const JSONBIN_API_KEY = '$2a$10$cMF9fBW5D95eUIkajbeETePuU1zoh23GhYnsBTuhao0WwnLZ2c74m'; 
-const BIN_ID = '68135a788a456b7966953ee7';
-const BIN_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
+const JSONBIN_API_KEY = '$2a$10$cMF9fBW5D95eUIkajbeETePuU1zoh23GhYnsBTuhao0WwnLZ2c74m';
+const BIN_ID = '68135a788a456b7966953ee7'; // replace with your Bin ID
+const BIN_URL = `https://jsonbin.io/api/bins/${BIN_ID}`;
 
 export default async function handler(req, res) {
   if (req.method === 'POST') {
