@@ -1,11 +1,65 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Vacation Calendar</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background-color: #f4f4f4;
+      margin: 0;
+      padding: 0;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: white;
+      padding: 20px;
+    }
+
+    .header img.logo {
+      width: 60px;
+      margin-right: 15px;
+    }
+
+    h1 {
+      font-size: 28px;
+      color: #333;
+    }
+
+    iframe {
+      margin-top: 20px;
+      border: none;
+    }
+
+    .cars {
+      margin-top: 30px;
+    }
+
+    .cars img {
+      width: 300px;
+      margin: 20px;
+      border-radius: 10px;
+    }
+  </style>
 </head>
 <body>
-  <h2>Shared Calendar</h2>
-  <iframe frameborder="0" height="500px" width="100%" src="https://calendar.online/5deb969c9fb87b85ffb7?iframe=true"></iframe>
+
+  <div class="header">
+    <img src="clipboard_image_26299c503232dd7fc1c1979b02b650de.png" alt="BMW Logo" class="logo" />
+    <h1>Vacation Calendar</h1>
+  </div>
+
+  <iframe frameborder="0" height="500px" width="90%" src="https://calendar.online/5deb969c9fb87b85ffb7?iframe=true"></iframe>
+
+  <div class="cars">
+    <img src="image-removebg-preview (11).png" alt="BMW SUV">
+    <img src="image-removebg-preview (10).png" alt="BMW Sedan">
+  </div>
+
 </body>
 </html>
