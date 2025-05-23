@@ -5,51 +5,7 @@
   <title>Vacation Calendar</title>
 </head>
 <body>
-  <h1>Submit Vacation</h1>
-  <form id="vacationForm">
-    <input type="text" id="name" placeholder="Name" required />
-    <input type="date" id="start" required />
-    <input type="date" id="end" required />
-    <input type="text" id="reason" placeholder="Reason for Vacation" required />
-    <button type="submit">Submit Vacation</button>
-  </form>
-
-  <hr/>
-
   <h2>Shared Calendar</h2>
   <iframe frameborder="0" height="500px" width="100%" src="https://calendar.online/5deb969c9fb87b85ffb7?iframe=true"></iframe>
-
-  <script>
-    document.getElementById('vacationForm').addEventListener('submit', async (event) => {
-      event.preventDefault();
-
-      const vacationData = {
-        name: document.getElementById('name').value,
-        start: document.getElementById('start').value,
-        end: document.getElementById('end').value,
-        reason: document.getElementById('reason').value
-      };
-
-      try {
-        const response = await fetch('/api/vacations', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(vacationData)
-        });
-
-        const result = await response.json();
-        if (response.ok) {
-          alert('Vacation submitted successfully!');
-        } else {
-          alert('Error: ' + result.error);
-        }
-      } catch (err) {
-        console.error('Submit failed', err);
-        alert('Error submitting vacation.');
-      }
-    });
-  </script>
 </body>
 </html>
