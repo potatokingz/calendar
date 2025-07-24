@@ -1,261 +1,27 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="bg">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Vacation Calendar</title>
-  <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+  <title>Пренасочване</title>
+  
+  <!-- This meta tag performs the immediate redirect. The "0" means 0 seconds delay. -->
+  <meta http-equiv="refresh" content="0;url=https://autobavaria-calendar.vercel.app/" />
+  
   <style>
-    :root {
-      --primary: #002b4e;
-      --secondary: #00b3c6;
-      --accent: #ffb347;
-      --white: #fff;
-      --muted: #eaf6fb;
-      --shadow: 0 8px 32px rgba(0,0,0,0.16);
-    }
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      font-family: 'Poppins', sans-serif;
-      min-height: 100vh;
-      background: linear-gradient(120deg, #eaf6fb 0%, #f6fafd 70%, #c8e6fa 100%);
-      color: #111;
-      overflow-x: hidden;
-      scroll-behavior: smooth;
-      position: relative;
-    }
-    .bubbles {
-      position: fixed;
-      top:0; left:0; width:100vw; height:100vh; z-index:0; pointer-events:none; overflow:hidden;
-    }
-    .bubble {
-      position: absolute;
-      bottom: -120px;
-      border-radius: 50%;
-      opacity: 0.25;
-      animation: floatUp 16s linear infinite;
-      background: linear-gradient(135deg, var(--secondary), var(--accent));
-      filter: blur(1px);
-    }
-    .bubble:nth-child(1) { left: 10vw; width: 90px; height: 90px; animation-duration: 17s; }
-    .bubble:nth-child(2) { left: 35vw; width: 60px; height: 60px; animation-duration: 22s; }
-    .bubble:nth-child(3) { left: 70vw; width: 110px; height: 110px; animation-duration: 13s; }
-    .bubble:nth-child(4) { left: 80vw; width: 80px; height: 80px; animation-duration: 20s; }
-    .bubble:nth-child(5) { left: 50vw; width: 120px; height: 120px; animation-duration: 18s; }
-    @keyframes floatUp {
-      from { transform: translateY(0) scale(1);}
-      to { transform: translateY(-110vh) scale(1.2);}
-    }
-    .fade-in { opacity: 0; transform: translateY(40px) scale(0.98); transition: opacity 1.1s cubic-bezier(.57,1.21,.77,.96), transform 1s cubic-bezier(.57,1.21,.77,.96);}
-    .fade-in.show { opacity: 1; transform: translateY(0) scale(1);}
-    .header {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 54px 20px 28px;
-      background: rgba(255,255,255,0.9);
-      border-radius: 0 0 36px 36px;
-      box-shadow: var(--shadow);
-      z-index: 2;
-      position: relative;
-      gap: 24px;
-    }
-    .header img.logo {
-      width: 90px;
-      margin-right: 12px;
-      filter: drop-shadow(0 4px 10px #eee) brightness(1.1) saturate(1.4);
-      transition: transform 0.5s cubic-bezier(.57,1.21,.77,.96);
-      border-radius: 18px;
-      background: linear-gradient(135deg, #eaf6fb 70%, #c8e6fa 100%);
-      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
-      padding: 9px;
-    }
-    .header img.logo:hover {
-      transform: rotate(-5deg) scale(1.09);
-    }
-    h1 {
-      font-size: 54px;
-      font-weight: 700;
-      color: #111 !important;
-      background: none !important;
-      -webkit-background-clip: unset !important;
-      -webkit-text-fill-color: unset !important;
-      background-clip: unset !important;
-      text-fill-color: unset !important;
-      letter-spacing: -2px;
-      font-family: 'Poppins', sans-serif !important; /* Normal font */
-      user-select: none;
-      text-shadow: none !important;
-      text-align: center;
-    }
-    .shine {
-      background: none !important;
-      color: #111 !important;
-      -webkit-background-clip: unset !important;
-      -webkit-text-fill-color: unset !important;
-      animation: none !important;
-      font-family: 'Poppins', sans-serif !important; /* Normal font */
-      font-weight: 700;
-    }
-    .calendar-container {
-      width: 100%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      margin: 60px 0 32px 0;
-      z-index: 2;
-      position: relative;
-    }
-    iframe {
-      width: 92vw;
-      max-width: 1100px;
-      height: 590px;
-      border: none;
-      border-radius: 20px;
-      box-shadow: 0 16px 48px 0 rgba(0,0,0,0.13), 0 2px 8px 0 rgba(0,0,0,0.11);
-      background: var(--white);
-      display: block;
-      margin: 0 auto;
-      filter: drop-shadow(0 6px 30px #b1e1fa77);
-      transition: box-shadow 0.3s;
-    }
-    iframe:hover { box-shadow: 0 24px 60px 0 rgba(0,0,0,0.18), 0 4px 14px 0 rgba(0,0,0,0.10);}
-    .cars {
-      margin-top: 70px;
-      display: flex;
-      justify-content: center;
-      flex-wrap: wrap;
-      gap: 50px;
-      z-index: 2;
-      position: relative;
-    }
-    .cars img {
-      width: 370px;
-      border-radius: 22px;
-      border: 1.5px solid #c8e6fa;
-      box-shadow: 0 10px 36px rgba(0,0,0,0.11), 0 1.5px 6px #b1e1fa22;
-      transition: transform 0.33s cubic-bezier(.57,1.21,.77,.96), box-shadow 0.33s;
-      background: linear-gradient(120deg, #fff 60%, #eaf6fb 100%);
-      filter: saturate(1.04);
-    }
-    .cars img:hover {
-      transform: scale(1.055) rotate(-2deg);
-      box-shadow: 0 24px 64px rgba(0,0,0,0.13), 0 4px 18px #b1e1fa44;
-      filter: brightness(1.03) saturate(1.2);
-    }
-    .credit {
-      margin: 100px 0 48px;
-      font-size: 18px;
-      color: #111;
-      text-shadow: 0 1px 0 #fff8;
-      z-index: 2;
-      position: relative;
-      letter-spacing: 0.5px;
-      font-family: 'Fira Mono', monospace, 'Poppins', sans-serif;
-    }
-    .credit a {
-      color: var(--secondary);
-      text-decoration: none;
-      font-weight: 600;
-      border-bottom: 2px dashed var(--accent);
-      transition: color 0.25s;
-      padding: 0 5px;
-      background: linear-gradient(120deg, #fff 60%, #eaf6fb 100%);
-      border-radius: 4px;
-    }
-    .credit a:hover {
-      color: #222;
-      background: linear-gradient(90deg, var(--accent) 60%, #fff 100%);
-    }
-    #loader {
-      position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-      background: linear-gradient(120deg, #eaf6fb 0%, #c8e6fa 100%);
-      display: flex; align-items: center; justify-content: center;
-      z-index: 9999;
-      transition: opacity 0.8s cubic-bezier(.57,1.21,.77,.96), visibility 0.8s;
-    }
-    #loader.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
-    .spinner {
-      border: 7px solid #fff;
-      border-top: 7px solid var(--primary);
-      border-right: 7px solid var(--secondary);
-      border-radius: 50%;
-      width: 74px; height: 74px;
-      animation: spin 1.4s cubic-bezier(.57,1.21,.77,.96) infinite;
-      box-shadow: 0 4px 16px #b1e1fa99;
-    }
-    @keyframes spin { 0% { transform: rotate(0deg);} 100% { transform: rotate(360deg);} }
-    /* Remove the floating arrow button and tooltip */
-    .fab, .fab-tooltip { display: none !important; }
-    @media (max-width: 900px) {
-      .cars img { width: 90vw; max-width: 340px; }
-      .calendar-container iframe { height: 420px;}
-      iframe { height: 420px;}
-      h1 { font-size: 34px;}
-      .header { flex-direction: column; gap: 14px; text-align: center;}
-      .header img.logo { margin: 0 0 10px 0;}
-      .fab { width: 54px; height: 54px; font-size: 1.7rem;}
-      .fab-tooltip { font-size: .96rem;}
-    }
-    @media (max-width: 600px) {
-      html,body { font-size: 15px;}
-      .header { padding: 28px 8px 16px;}
-      .cars { margin-top: 38px;}
-      .credit { margin: 60px 0 30px;}
-    }
+    body { font-family: sans-serif; text-align: center; padding-top: 50px; }
+    a { color: #0066cc; }
   </style>
 </head>
 <body>
 
-  <div class="bubbles" aria-hidden="true">
-    <div class="bubble"></div>
-    <div class="bubble"></div>
-    <div class="bubble"></div>
-    <div class="bubble"></div>
-    <div class="bubble"></div>
-  </div>
+  <!-- This content is a fallback for the rare case that the redirect doesn't work automatically. -->
+  <p>
+    Пренасочване...
+  </p>
+  <p>
+    Ако не бъдете пренасочени автоматично, моля, кликнете тук:
+    <a href="https://autobavaria-calendar.vercel.app/">https://autobavaria-calendar.vercel.app/</a>
+  </p>
 
-  <div id="loader">
-    <div class="spinner"></div>
-  </div>
-
-  <div class="header fade-in">
-    <img src="https://i.ibb.co/1fLGmQ9G/IMG-0629.png" alt="BMW Logo" class="logo" />
-    <h1><span class="shine">Vacation Calendar</span></h1>
-  </div>
-
-  <div class="calendar-container fade-in">
-    <iframe src="https://calendar.online/5deb969c9fb87b85ffb7?iframe=true" title="Vacation Calendar"></iframe>
-  </div>
-
-  <div class="cars fade-in">
-    <img src="https://i.ibb.co/GQ5zx306/image-removebg-preview-27-1.png" alt="BMW SUV" loading="lazy">
-    <img src="https://i.ibb.co/TSxpt68/bmw-sedan-1-1.png" alt="BMW Sedan" loading="lazy">
-  </div>
-
-  <div class="credit fade-in">
-    Made with care by <a href="https://potatoking.net" target="_blank" rel="noopener">Yasen Yanakiev</a>
-  </div>
-
-  <script>
-    window.addEventListener("load", () => {
-      const loader = document.getElementById("loader");
-      loader.classList.add("hidden");
-      setTimeout(() => {
-        document.querySelectorAll(".fade-in").forEach((el, i) => {
-          setTimeout(() => el.classList.add("show"), i * 320 + 100);
-        });
-      }, 300);
-    });
-    document.querySelectorAll('.bubble').forEach((bubble) => {
-      function randomize() {
-        bubble.style.left = Math.random()*85 + "vw";
-        bubble.style.animationDelay = (Math.random()*-18)+"s";
-        bubble.style.opacity = 0.18 + Math.random()*0.19;
-      }
-      randomize();
-      bubble.addEventListener('animationiteration', randomize);
-    });
-  </script>
 </body>
 </html>
